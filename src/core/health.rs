@@ -66,6 +66,11 @@ impl HealthCheckService {
                     return Err(anyhow!("R2 access_key, secret_key, and account_id cannot be empty"));
                 }
             }
+            crate::config::StorageConfig::Local { path } => {
+                if path.trim().is_empty() {
+                    return Err(anyhow!("Local storage path cannot be empty"));
+                }
+            }
         }
 
         // 4. Validate Veevi Config

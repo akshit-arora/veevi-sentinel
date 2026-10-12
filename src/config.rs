@@ -93,6 +93,9 @@ pub enum StorageConfig {
         access_key: String,
         secret_key: String,
     },
+    Local {
+        path: String,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -173,6 +173,9 @@ impl SchedulerService {
             StorageConfig::R2 { bucket, account_id, access_key, secret_key } => {
                 let endpoint = format!("https://{}.r2.cloudflarestorage.com", account_id);
                 Box::new(S3Adapter::new(bucket, "auto", Some(&endpoint), access_key, secret_key))
+            },
+            StorageConfig::Local { path } => {
+                Box::new(crate::adapters::storage::local::LocalAdapter::new(path))
             }
         };
         Ok(uploader)

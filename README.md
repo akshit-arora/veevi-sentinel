@@ -19,7 +19,7 @@ Most database backup setups rely on brittle bash scripts that run `pg_dump` to `
 * 🔒 **Zero-Knowledge Encryption**: Backups are encrypted locally using **XChaCha20-Poly1305 (256-bit key)** authenticated encryption before leaving your server. Storage providers only ever see high-entropy ciphertext.
 * 🚀 **True Stream Pipeline**: Database dumps pipe directly through memory buffers to compression, encryption, and multipart cloud upload. **No plaintext touches disk at any point**, avoiding disk exhaustion and OOM errors.
 * 🗄 **Multi-Engine Support**: Native support for **PostgreSQL**, **MySQL**, **MariaDB**, and **SQLite**.
-* ☁️ **Bring Your Own Storage**: Direct streaming to **AWS S3** (or S3-compatible like MinIO), **Cloudflare R2**, and **Google Drive** (via OAuth2 headless Device Flow).
+* ☁️ **Bring Your Own Storage**: Direct streaming to **AWS S3** (or S3-compatible like MinIO), **Cloudflare R2**, **Google Drive** (via OAuth2 headless Device Flow), and **Local Directory / NAS**.
 * ⏱ **Built-In Scheduler & Retention**: Automated cron schedules and automatic pruning (`keep_last_n`) to enforce compliance and control storage costs.
 * 🔔 **Webhook Alerts**: Optional integration with Veevi for delivery notifications and metrics (backup duration, ciphertext size, status).
 
@@ -40,17 +40,33 @@ Most database backup setups rely on brittle bash scripts that run `pg_dump` to `
 
 ## 📦 Installation
 
-### Option 1: Quick Install Script (Linux x86_64 / ARM64)
+### Option 1: 30-Second Zero-Risk Docker Sandbox (Recommended for Evaluation)
+
+Evaluate Veevi Sentinel on your workstation without touching real infrastructure or live databases:
 
 ```bash
-curl -fsSL https://sentinel.getveevi.com/install.sh | sh
+docker run --rm -it veevi/sentinel:demo
+```
+
+Pre-configured with:
+* A seeded SQLite database (`/demo/app.db`) containing realistic user and order records
+* A local storage adapter (`/demo/backups`)
+* Pre-configured 32-byte XChaCha20-Poly1305 encryption key
+* Interactive welcome terminal guiding you through `dry-run`, `backup`, and `restore`
+
+---
+
+### Option 2: Quick Install Script (Linux x86_64 / ARM64)
+
+```bash
+curl -fsSL https://sentinel.veevi.dev/install.sh | sh
 ```
 
 This installs `veevi-sentinel` into `~/.local/bin` (or `/usr/local/bin` if run as root) and verifies the cryptographic checksum against the published `SHA256SUMS` manifest.
 
-### Option 2: Prebuilt Binaries (GitHub Releases)
+### Option 3: Prebuilt Binaries (GitHub Releases)
 
-Download prebuilt archives for your architecture from the [GitHub Releases](https://github.com/veevi/veevi-sentinel/releases) page:
+Download prebuilt archives for your architecture from the [GitHub Releases](https://github.com/akshit-arora/veevi-sentinel/releases) page:
 
 * **Linux x86_64** (Static musl binary): `veevi-sentinel-<version>-linux-x86_64.tar.gz`
 * **Linux ARM64** (Static musl binary): `veevi-sentinel-<version>-linux-aarch64.tar.gz`
@@ -64,12 +80,12 @@ tar -xzf veevi-sentinel-*-linux-x86_64.tar.gz
 sudo install -m 0755 veevi-sentinel /usr/local/bin/
 ```
 
-### Option 3: Build from Source
+### Option 4: Build from Source
 
 Requires Rust 1.75+ and Cargo:
 
 ```bash
-git clone https://github.com/veevi/veevi-sentinel.git
+git clone https://github.com/akshit-arora/veevi-sentinel.git
 cd veevi-sentinel
 cargo build --release
 sudo cp target/release/veevi-sentinel /usr/local/bin/
@@ -218,6 +234,16 @@ storage:
 > 2. Create credentials: select **OAuth Client ID** and choose **TVs and Limited Input devices**.  
 > 3. Download the JSON to `client_secret_file`.  
 > 4. Run `veevi-sentinel dry-run`. Visit the URL displayed in the terminal (e.g., `https://www.google.com/device`), enter the short code, and authenticate. Permanent tokens are cached at `token_cache_file`.
+
+#### Local Directory / NAS (Staging & Air-Gapped)
+```yaml
+storage:
+  type: local
+  path: "/var/backups/sentinel"
+```
+
+> **Direct Local Storage**:  
+> Perfect for Docker staging sandboxes, developer evaluation, air-gapped systems, or mounted NAS/NFS storage volumes. Backups remain fully encrypted with XChaCha20-Poly1305.
 
 ### 4. `logging`
 
