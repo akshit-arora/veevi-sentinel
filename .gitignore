@@ -1,4 +1,6 @@
 /target
+/dist
 config.yaml
 config.yml
 .DS_Store
+

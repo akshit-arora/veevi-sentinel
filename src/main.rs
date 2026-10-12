@@ -109,8 +109,8 @@ async fn main() -> anyhow::Result<()> {
             crate::core::health::HealthCheckService::live_check(config_arc, target.clone()).await?;
         }
         Commands::InstallService => {
-            println!("Installing service...");
-            // TODO: Systemd / Launchd install script logic
+            println!("⚙️  Configuring background system service for Veevi Sentinel...");
+            crate::core::service::ServiceInstaller::install(&config_file)?;
         }
         Commands::Backup { target } => {
             if let Some(t) = target {
