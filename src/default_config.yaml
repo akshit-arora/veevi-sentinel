@@ -1,0 +1,42 @@
+databases:
+  # Example: PostgreSQL Database
+  - type: postgres
+    id: "client-a-postgres"
+    connection_string: "postgres://user:password@localhost:5432/client_a_db"
+    cron: "0 0 2 * * * *"       # Run every day at 2:00 AM
+    keep_last_n: 7              # Keep only the latest 7 backups
+
+security:
+  encryption_algo: "xchacha20poly1305"
+  # MUST be exactly 32 bytes! Keep this extremely secure. If you lose this key, you lose your backups.
+  encryption_key: "CHANGE_ME_TO_32_BYTE_SECRET_KEY!" 
+
+# Choose ONE storage provider (S3, R2, or Gdrive). Examples below:
+storage:
+  type: r2
+  bucket: "sentinel-backups"
+  account_id: "your_cloudflare_account_id"
+  access_key: "your_r2_access_key"
+  secret_key: "your_r2_secret_key"
+
+# For AWS S3:
+# storage:
+#   type: s3
+#   bucket: "my-aws-bucket"
+#   region: "us-east-1"
+#   endpoint: null
+#   access_key: "YOUR_ACCESS_KEY"
+#   secret_key: "YOUR_SECRET_KEY"
+
+# For Google Drive (OAuth2 Device Flow):
+# storage:
+#   type: gdrive
+#   client_secret_file: "/path/to/client_secret.json"
+#   token_cache_file: "/path/to/token_cache.json"
+
+logging:
+  level: "info"                 # trace, debug, info, warn, error
+  type: "daily"                 # single or daily
+  file_path: "/var/log/veevi-sentinel"
+  file_prefix: "sentinel"
+  purge_after_days: 30
